@@ -1,7 +1,7 @@
 /** Pure helpers for the session-local heads-up observer. */
 import { parseSettings, type ObserverSettings } from "./settings.ts";
 
-export const MAX_TRANSCRIPT_CHARS = 48_000;
+export const MAX_TRANSCRIPT_CHARS = 96_000;
 export const MAX_MESSAGE_CHARS = 8_000;
 export const CHECK_INTERVAL = 6;
 export const CHECK_TIMEOUT_MS = 45_000;

@@ -41,7 +41,7 @@ The switch, reminders, and deduplication history are stored on the active Pi ses
 
 ## Privacy and cost
 
-Enabling observation sends **text excerpts and tool calls/results from the current session** to the selected observer model provider again. They may contain sensitive information and **are not automatically redacted**. Only text from the current active branch is sent, capped at 48,000 characters overall and 8,000 per item; images, thinking blocks, system prompts, tool definitions, and extension-internal messages are excluded. The observer must cite text from the excerpt, but it can still miss important issues or interpret them incorrectly.
+Enabling observation sends **text excerpts and tool calls/results from the current session** to the selected observer model provider again. They may contain sensitive information and **are not automatically redacted**. Only text from the current active branch is sent, capped at 96,000 characters overall and 8,000 per item; images, thinking blocks, system prompts, tool definitions, and extension-internal messages are excluded. The observer must cite text from the excerpt, but it can still miss important issues or interpret them incorrectly.
 
 Each request has a 45-second timeout, no automatic retries, and a requested maximum of 900 output tokens; providers may not enforce that limit. Overlong output triggers cancellation. There is no fixed check-count or strict monetary limit; cancelled or timed-out requests may still incur charges. `/ysk status` shows provider-reported usage and estimated cost, which may be incomplete after cancellation, timeout, or missing provider usage. Observer usage is not included in Pi's normal session totals or status bar.
 
