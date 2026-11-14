@@ -21,6 +21,7 @@ export default function headsUpExtension(pi: ExtensionAPI) {
   let settings: ObserverSettings | undefined;
   let settingsError: string | undefined;
   let turnsSinceCheck = 0;
+  let checkDue = false;
   let generation = 0;
   let stopped = false;
   let detailsOpen = false;
@@ -37,6 +38,7 @@ export default function headsUpExtension(pi: ExtensionAPI) {
       if (entry.type === "custom" && entry.customType === STATE_TYPE) state = restoreState(entry.data);
     }
     turnsSinceCheck = 0;
+    checkDue = false;
     if (state.lastResult === "Checking") state.lastResult = "Previous check interrupted; usage may be incomplete";
     try {
       const defaults = readSettings();
@@ -193,6 +195,7 @@ export default function headsUpExtension(pi: ExtensionAPI) {
     const controller = new AbortController();
     const token = ++generation;
     pending = { controller, generation: token };
+    checkDue = false;
     turnsSinceCheck = 0;
     state.attempts++;
     state.lastResult = "Checking";
@@ -306,7 +309,6 @@ export default function headsUpExtension(pi: ExtensionAPI) {
     if (event.source !== "extension") cancelPending();
     return { action: "continue" };
   });
-  pi.on("agent_settled", (event) => { if (event.aborted) cancelPending(); });
   pi.on("session_shutdown", (_event, ctx) => {
     stopped = true;
     cancelPending();
@@ -315,7 +317,15 @@ export default function headsUpExtension(pi: ExtensionAPI) {
   pi.on("turn_end", (event, ctx) => {
     if (!state.enabled || !ctx.hasUI || event.outcome !== "completed") return;
     turnsSinceCheck++;
-    if (turnsSinceCheck >= CHECK_INTERVAL) startCheck(ctx, event.context.contextMessages, false);
+    if (turnsSinceCheck >= CHECK_INTERVAL) checkDue = true;
+  });
+  pi.on("agent_settled", (event, ctx) => {
+    if (event.aborted) { cancelPending(); return; }
+    if (!state.enabled || !ctx.hasUI || !checkDue) return;
+    const messages = ctx.sessionManager.buildSessionProjection().messages;
+    if (!canCheck(ctx, false)) return;
+    checkDue = false;
+    startCheck(ctx, messages, false);
   });
 
   pi.registerShortcut("ctrl+alt+y", {

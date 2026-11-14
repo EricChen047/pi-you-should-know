@@ -147,6 +147,8 @@ test("default off, turn threshold, no tools and bounded requests", async () => {
   for (let i = 0; i < CHECK_INTERVAL - 1; i++) await h.emit("turn_end", { outcome: "completed", context: { contextMessages: [user("test"), tool("2 tests failed")] } });
   assert.equal(h.calls.length, 0);
   await h.emit("turn_end", { outcome: "completed", context: { contextMessages: [user("test"), tool("2 tests failed")] } });
+  assert.equal(h.calls.length, 0, "do not inspect a turn while the agent run may continue");
+  await h.emit("agent_settled", { aborted: false });
   assert.equal(h.calls.length, 1);
   const call = h.calls[0];
   assert.equal(call.input.tools, undefined);

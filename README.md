@@ -31,7 +31,7 @@ For local development, use `pi -e ./index.ts` or install the repository director
 - `/ysk off`: disable observation, request cancellation of in-flight work, and clear the current reminder.
 - `/ysk reset`: reset the displayed check counters while retaining cumulative usage; this is optional and does not affect the observer schedule.
 
-When enabled, the observer attempts a check after every six completed agent turns with no fixed per-branch check limit. No further checks run while a reminder is pending. The observer runs asynchronously, has no tools, and never injects messages into the main agent automatically. Its interface is in English; model-generated reminders remain in the user's language.
+When enabled, the observer attempts a check after every six completed agent turns, but waits until the current agent run settles before inspecting the conversation; there is no fixed per-branch check limit. No further checks run while a reminder is pending. The observer runs asynchronously, has no tools, and never injects messages into the main agent automatically. Its interface is in English; model-generated reminders remain in the user's language.
 
 The observer model and thinking level do not change the main agent. Defaults are the current main model and `low`. Selectable levels are those the model declares among `minimal`, `low`, `medium`, `high`, `xhigh`, and `max`; `off` is not offered. Models without thinking support receive no thinking parameter. Checks pause if the selected model does not support the configured level. Actual behavior depends on the provider.
 
