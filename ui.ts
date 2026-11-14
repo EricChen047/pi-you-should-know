@@ -80,7 +80,7 @@ export function createNoteWidget(finding: Finding, tui: TUI, theme: Theme, onAct
       lines.push(...layout.lines);
       hits = layout.hits;
     }
-    lines.push(theme.fg("dim", truncateToWidth("  Ctrl+Alt+Y or Ctrl+Shift+Y to review", width)));
+    lines.push(theme.fg("dim", truncateToWidth("  Ctrl+Alt+Y to review", width)));
     return lines;
   };
   return {

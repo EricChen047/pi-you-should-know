@@ -319,13 +319,10 @@ export default function headsUpExtension(pi: ExtensionAPI) {
     if (turnsSinceCheck >= CHECK_INTERVAL) startCheck(ctx, event.context.contextMessages, false);
   });
 
-  const reviewShortcut = {
+  pi.registerShortcut("ctrl+alt+y", {
     description: "Review the observer reminder",
-    handler: async (ctx: ExtensionContext) => { if (ctx.mode === "tui") await showActions(ctx); },
-  };
-  // Some macOS terminals do not deliver Ctrl+Alt+Y consistently when Option is used as Meta.
-  pi.registerShortcut("ctrl+alt+y", reviewShortcut);
-  pi.registerShortcut("ctrl+shift+y", reviewShortcut);
+    handler: async (ctx) => { if (ctx.mode === "tui") await showActions(ctx); },
+  });
 
   pi.registerCommand("ysk", {
     description: "Heads-up observer: on, off, status, check, model, thinking",
