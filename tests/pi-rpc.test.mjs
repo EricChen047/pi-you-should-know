@@ -105,12 +105,12 @@ test("real Pi RPC: opt in, mock model observation, widget and branch-local state
 
     mark = records.length;
     await command({ type: "prompt", message: "/ysk status" });
-    await wait((record) => record.method === "notify" && record.message.includes("checks 1/12") && record.message.includes("input 20"), mark);
+    await wait((record) => record.method === "notify" && record.message.includes("checks 1") && record.message.includes("input 20"), mark);
 
     await command({ type: "prompt", message: "/reload" });
     mark = records.length;
     await command({ type: "prompt", message: "/ysk status" });
-    await wait((record) => record.method === "notify" && record.message.includes("Observer on") && record.message.includes("checks 1/12"), mark);
+    await wait((record) => record.method === "notify" && record.message.includes("Observer on") && record.message.includes("checks 1"), mark);
 
     await command({ type: "new_session" });
     mark = records.length;

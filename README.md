@@ -29,9 +29,9 @@ For local development, use `pi -e ./index.ts` or install the repository director
 - `/ysk thinking`: choose a level supported by the observer model, or use a command such as `/ysk thinking high`.
 - `/ysk check`: request a manual check, subject to the same limit.
 - `/ysk off`: disable observation, request cancellation of in-flight work, and clear the current reminder.
-- `/ysk reset`: reset the current branch's check count while retaining cumulative usage; this permits additional requests.
+- `/ysk reset`: reset the displayed check counters while retaining cumulative usage; this is optional and does not affect the observer schedule.
 
-When enabled, the observer attempts a check after every six completed agent turns, up to twelve checks per branch unless explicitly reset. No further checks run while a reminder is pending. The observer runs asynchronously, has no tools, and never injects messages into the main agent automatically. Its interface is in English; model-generated reminders remain in the user's language.
+When enabled, the observer attempts a check after every six completed agent turns with no fixed per-branch check limit. No further checks run while a reminder is pending. The observer runs asynchronously, has no tools, and never injects messages into the main agent automatically. Its interface is in English; model-generated reminders remain in the user's language.
 
 The observer model and thinking level do not change the main agent. Defaults are the current main model and `low`. Selectable levels are those the model declares among `minimal`, `low`, `medium`, `high`, `xhigh`, and `max`; `off` is not offered. Models without thinking support receive no thinking parameter. Checks pause if the selected model does not support the configured level. Actual behavior depends on the provider.
 
@@ -43,7 +43,7 @@ The switch, reminders, and deduplication history are stored on the active Pi ses
 
 Enabling observation sends **text excerpts and tool calls/results from the current session** to the selected observer model provider again. They may contain sensitive information and **are not automatically redacted**. Only text from the current active branch is sent, capped at 48,000 characters overall and 8,000 per item; images, thinking blocks, system prompts, tool definitions, and extension-internal messages are excluded. The observer must cite text from the excerpt, but it can still miss important issues or interpret them incorrectly.
 
-Each request has a 45-second timeout, no automatic retries, and a requested maximum of 900 output tokens; providers may not enforce that limit. Overlong output triggers cancellation. The check count is bounded, but **there is no strict monetary limit**; cancelled or timed-out requests may still incur charges. `/ysk status` shows provider-reported usage and estimated cost, which may be incomplete after cancellation, timeout, or missing provider usage. Observer usage is not included in Pi's normal session totals or status bar.
+Each request has a 45-second timeout, no automatic retries, and a requested maximum of 900 output tokens; providers may not enforce that limit. Overlong output triggers cancellation. There is no fixed check-count or strict monetary limit; cancelled or timed-out requests may still incur charges. `/ysk status` shows provider-reported usage and estimated cost, which may be incomplete after cancellation, timeout, or missing provider usage. Observer usage is not included in Pi's normal session totals or status bar.
 
 ## Offline verification
 

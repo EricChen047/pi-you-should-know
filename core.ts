@@ -4,7 +4,6 @@ import { parseSettings, type ObserverSettings } from "./settings.ts";
 export const MAX_TRANSCRIPT_CHARS = 48_000;
 export const MAX_MESSAGE_CHARS = 8_000;
 export const CHECK_INTERVAL = 6;
-export const MAX_CHECKS = 12;
 export const CHECK_TIMEOUT_MS = 45_000;
 export const MAX_RESPONSE_CHARS = 8_000;
 export const STATE_TYPE = "session-heads-up-v1";
@@ -50,7 +49,7 @@ export function restoreState(data: unknown): ObserverState {
   const state = emptyState();
   if (!isRecord(data) || data.version !== 1) return state;
   state.enabled = data.enabled === true;
-  state.attempts = Math.min(MAX_CHECKS, Math.floor(nonnegative(data.attempts)));
+  state.attempts = Math.floor(nonnegative(data.attempts));
   state.completed = Math.min(state.attempts, Math.floor(nonnegative(data.completed)));
   const usage = isRecord(data.tokens) ? data.tokens : {};
   state.tokens = {

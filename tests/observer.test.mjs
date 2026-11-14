@@ -16,7 +16,7 @@ registerHooks({ resolve(specifier, context, nextResolve) {
 const { default: extension } = await import("../index.ts");
 const { createDetailsView, createNoteWidget } = await import("../ui.ts");
 const { visibleWidth } = await import("@earendil-works/pi-tui");
-import { CHECK_INTERVAL, MAX_CHECKS, MAX_TRANSCRIPT_CHARS, STATE_TYPE, emptyState, findingKey, parseFinding, restoreState, transcriptForObserver } from "../core.ts";
+import { CHECK_INTERVAL, MAX_TRANSCRIPT_CHARS, STATE_TYPE, emptyState, findingKey, parseFinding, restoreState, transcriptForObserver } from "../core.ts";
 import { settingsPath, supportsThinking } from "../settings.ts";
 
 const previousAgentDir = process.env.PI_CODING_AGENT_DIR;
@@ -229,18 +229,21 @@ test("feedback is branch-local, honors Chinese titles, and editor handoff never 
   assert.deepEqual(fresh.lastState().seen, []);
 });
 
-test("caps checks, reset preserves usage, and forks do not inherit consent", async () => {
+test("checks have no fixed cap, reset preserves usage, and forks do not inherit consent", async () => {
   const s = emptyState();
   s.enabled = true;
-  s.attempts = MAX_CHECKS;
+  s.attempts = 999;
   s.tokens.input = 123;
   const h = harness([{ type: "custom", customType: STATE_TYPE, data: s }]);
   await h.emit("session_start", { reason: "resume" });
   await h.command("check");
-  assert.equal(h.calls.length, 0);
+  assert.equal(h.calls.length, 1);
+  h.calls[0].resolve(response(null));
+  await tick(); await tick();
+  assert.equal(h.lastState().attempts, 1000);
   await h.command("reset");
   assert.equal(h.lastState().attempts, 0);
-  assert.equal(h.lastState().tokens.input, 123);
+  assert.equal(h.lastState().tokens.input, 144);
   await h.emit("session_start", { reason: "fork" });
   assert.equal(h.lastState().enabled, false);
   assert.equal(h.lastState().tokens.input, 0);
@@ -396,7 +399,7 @@ test("unreadable settings fail closed without overwriting or falling back", asyn
 test("restore rejects damaged state and never enables without explicit true", () => {
   assert.equal(restoreState({ version: 1, enabled: "yes", tokens: { input: -5 }, finding: {} }).enabled, false);
   assert.equal(restoreState({ version: 1, attempts: Infinity }).attempts, 0);
-  assert.equal(restoreState({ version: 1, attempts: 999 }).attempts, MAX_CHECKS);
+  assert.equal(restoreState({ version: 1, attempts: 999 }).attempts, 999);
 });
 
 const mouse = (x, y, width, extra = {}) => ({

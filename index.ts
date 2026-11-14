@@ -2,7 +2,7 @@
 import { randomUUID } from "node:crypto";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import {
-  CHECK_INTERVAL, CHECK_TIMEOUT_MS, MAX_CHECKS, MAX_RESPONSE_CHARS, OBSERVER_INSTRUCTIONS, STATE_TYPE,
+  CHECK_INTERVAL, CHECK_TIMEOUT_MS, MAX_RESPONSE_CHARS, OBSERVER_INSTRUCTIONS, STATE_TYPE,
   emptyState, findingKey, isExplicitSilence, parseFinding, restoreState, safeLine, transcriptForObserver,
   type ObserverState,
 } from "./core.ts";
@@ -93,7 +93,7 @@ export default function headsUpExtension(pi: ExtensionAPI) {
     const thinking = selected && !selected.reasoning ? " (model does not support thinking)" : supported ? " (requested)" : " (unsupported by model)";
     const virtual = selected?.api === "pi-virtual" ? " (virtual model may route to another provider)" : "";
     const config = settings ? `model ${model}${virtual}; thinking ${settings.thinking}${thinking}` : `${settingsError}: ${settingsPath()}`;
-    return `Observer ${state.enabled ? "on" : "off"}; ${config}; checks ${state.attempts}/${MAX_CHECKS}, completed ${state.completed}; input ${t.input}, output ${t.output}, cache read ${t.cacheRead}, cache write ${t.cacheWrite}; estimated $${t.cost.toFixed(4)}. Observer usage is separate from Pi session totals.`;
+    return `Observer ${state.enabled ? "on" : "off"}; ${config}; checks ${state.attempts}, completed ${state.completed}; input ${t.input}, output ${t.output}, cache read ${t.cacheRead}, cache write ${t.cacheWrite}; estimated $${t.cost.toFixed(4)}. Observer usage is separate from Pi session totals.`;
   }
 
   function rememberCurrentFinding() {
@@ -167,7 +167,6 @@ export default function headsUpExtension(pi: ExtensionAPI) {
     else if (!supportsThinking(model, settings.thinking)) reason = `Observer model does not support ${settings.thinking}; choose a level with /ysk thinking.`;
     else if (pending) reason = "A check is already in progress.";
     else if (state.finding) reason = "Review the current reminder first.";
-    else if (state.attempts >= MAX_CHECKS) reason = "Check limit reached for this branch; use /ysk reset to reset it.";
     if (reason && ctx.hasUI) {
       if (manual) ctx.ui.notify(reason, "warning");
       else if (state.enabled && (!settings || !model || !ctx.modelRegistry.hasConfiguredAuth(model) || !supportsThinking(model, settings.thinking)) && state.lastResult !== reason) {
@@ -344,7 +343,7 @@ export default function headsUpExtension(pi: ExtensionAPI) {
           persist();
         }
         render(ctx);
-        ctx.ui.notify(`Observer enabled: excerpts of conversation and tool results, possibly sensitive, will be sent to the model below; up to ${MAX_CHECKS} checks. ${usageStatus(ctx)}`, "info");
+        ctx.ui.notify(`Observer enabled: excerpts of conversation and tool results, possibly sensitive, will be sent to the model below; one check every ${CHECK_INTERVAL} completed turns. ${usageStatus(ctx)}`, "info");
         return;
       }
       if (action === "model") {
@@ -438,9 +437,9 @@ export default function headsUpExtension(pi: ExtensionAPI) {
         }
         state.attempts = 0;
         state.completed = 0;
-        state.lastResult = "Check limit reset; cumulative usage preserved";
+        state.lastResult = "Check counters reset; cumulative usage preserved";
         persist();
-        ctx.ui.notify("Check limit reset; cumulative usage preserved.", "info");
+        ctx.ui.notify("Check counters reset; cumulative usage preserved.", "info");
         return;
       }
       if (action) {
