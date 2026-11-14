@@ -136,7 +136,7 @@ try:
         wait_for("上线前应确认", start)
         start = len(out)
         os.write(fd, b"d")  # Put the finding in the editor, without sending it.
-        wait_for("Please discuss this reminder", start)
+        wait_for("Reminder from the side agent", start)
         wait_for("DRAFT_TEST", start)
         print(f"PASS real Pi regular TUI ({columns} columns): keyboard details and draft preservation", flush=True)
     else:
@@ -150,12 +150,9 @@ try:
         start = len(out)
         click("[ Close ]")
         wait_for("\x1b[?2026l", start)
-        start = len(out)
-        feedback = os.environ.get("YSK_TEST_FEEDBACK", "Dismiss")
-        click(f"[ {feedback} ]")
-        wait_for("Marked as known" if feedback == "Got it" else "Reminder dismissed", start)
-        assert any("DRAFT_TEST" in text for text in screen_rows().values())
-        print(f"PASS real Pi TUI ({columns} columns): shortcut, mouse details, close and {feedback}", flush=True)
+        time.sleep(0.2)
+        assert not any("[ Dismiss ]" in text for text in screen_rows().values())
+        print(f"PASS real Pi TUI ({columns} columns): shortcut, mouse details, close clears reminder", flush=True)
     assert b"rendered line exceeds" not in out
 except BaseException as exc:
     print(f"TUI fixture failed: {exc}", flush=True)

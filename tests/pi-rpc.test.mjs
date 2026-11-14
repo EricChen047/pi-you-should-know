@@ -97,17 +97,11 @@ test("real Pi RPC: opt in, mock model observation, widget and branch-local state
     const selection = await wait((record) => record.method === "select" && record.title.includes("模拟测试失败"), mark);
     assert.ok(selection.options.includes("View details"));
     send({ type: "extension_ui_response", id: selection.id, value: "View details" });
+    await wait((record) => record.method === "setWidget" && !record.widgetLines, mark);
     const details = await wait((record) => record.method === "select" && record.title.includes("模型 side-model，思考 high"), mark);
     assert.match(details.title, /Evidence:/);
     send({ type: "extension_ui_response", id: details.id, value: "Close" });
     await view;
-
-    mark = records.length;
-    const dismiss = command({ type: "prompt", message: "/ysk" });
-    const actions = await wait((record) => record.method === "select" && record.title.includes("模拟测试失败"), mark);
-    send({ type: "extension_ui_response", id: actions.id, value: "Got it" });
-    await dismiss;
-    await wait((record) => record.method === "setWidget" && !record.widgetLines, mark);
 
     mark = records.length;
     await command({ type: "prompt", message: "/ysk status" });

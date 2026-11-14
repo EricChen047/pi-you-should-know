@@ -458,7 +458,7 @@ test("clicking actions updates the current branch without stealing editor text",
   assert.match(h.notifications.at(-1).message, /Marked as known/);
 });
 
-test("keyboard fallback and discussion preserve the user's draft", async () => {
+test("viewing details clears the heads-up, and discussion preserves the user's draft", async () => {
   const h = harness();
   await h.emit("session_start", { reason: "startup" });
   await h.command("on"); await h.command("check");
@@ -470,6 +470,7 @@ test("keyboard fallback and discussion preserve the user's draft", async () => {
   assert.match(h.editor(), /^Draft in progress/);
   assert.match(h.editor(), /测试没有通过/);
   assert.equal(h.lastState().finding, null);
+  assert.equal(h.widgets.at(-1).lines, undefined);
 });
 
 test("legacy UI status becomes English without changing model-generated content", () => {

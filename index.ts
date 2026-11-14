@@ -109,6 +109,11 @@ export default function headsUpExtension(pi: ExtensionAPI) {
     if (!finding || finding.id !== findingId || detailsOpen || stopped) return;
     detailsOpen = true;
     const selectionGeneration = generation;
+    // Opening the details is itself an acknowledgement: remove the heads-up widget
+    // while the user reviews it, and do not show the same finding again.
+    rememberCurrentFinding();
+    persist();
+    render(ctx);
     try {
       const result = ctx.mode === "tui"
         ? await ctx.ui.custom<"discuss" | "close">(
@@ -116,7 +121,7 @@ export default function headsUpExtension(pi: ExtensionAPI) {
           { blocked: { kind: "question", message: "Review reminder details" } },
         )
         : await ctx.ui.select(`${finding.title}\n\n${finding.detail}\n\nEvidence: ${finding.evidence}`, ["Discuss with agent", "Close"]);
-      if ((result === "discuss" || result === "Discuss with agent") && !stopped && generation === selectionGeneration && state.finding?.id === findingId) {
+      if ((result === "discuss" || result === "Discuss with agent") && !stopped && generation === selectionGeneration) {
         const existing = ctx.ui.getEditorText();
         const text = `Reminder from the side agent — please review:\n${finding.title}\n${finding.detail}\nEvidence: ${finding.evidence}`;
         ctx.ui.setEditorText(existing ? `${existing}\n\n${text}` : text);
