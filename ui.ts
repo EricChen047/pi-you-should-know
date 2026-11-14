@@ -8,6 +8,25 @@ import type { Finding } from "./core.ts";
 export type NoteAction = "got-it" | "details" | "dismiss";
 type DetailAction = "discuss" | "close";
 type Button<T extends string> = { label: string; action: T };
+
+function padPanelLine(line: string, width: number): string {
+  const clipped = truncateToWidth(line, width, "");
+  return clipped + " ".repeat(Math.max(0, width - visibleWidth(clipped)));
+}
+
+/** Keep custom overlays visually separate from the transcript underneath. */
+function panelLines(lines: readonly string[], width: number, theme: Theme): string[] {
+  if (width < 2) return lines.map((line) => truncateToWidth(line, width, ""));
+  const innerWidth = width - 2;
+  const border = theme.fg("border", "─");
+  const edge = (left: string, right: string, line: string) =>
+    theme.fg("border", left) + line + theme.fg("border", right);
+  return [
+    edge("╭", "╮", border.repeat(innerWidth)),
+    ...lines.map((line) => edge("│", "│", padPanelLine(line, innerWidth))),
+    edge("╰", "╯", border.repeat(innerWidth)),
+  ];
+}
 type Hit<T extends string> = { y: number; from: number; to: number; action: T };
 
 /** Layout stays cell-aligned when buttons wrap or the terminal is resized. */
@@ -95,22 +114,29 @@ export function createDetailsView(
     hits = [];
     if (width <= 0) return [];
     const maxHeight = Math.max(4, Math.min(18, tui.terminal.rows - 2));
-    const foot = buttonRows(width, 0, buttons, theme);
-    pageSize = Math.max(1, maxHeight - foot.lines.length - 3);
-    const body = wrapTextWithAnsi(`${finding.title}\n\n${finding.detail}\n\nEvidence: ${finding.evidence}`, Math.max(1, width - 2));
+    const contentWidth = Math.max(1, width - 2);
+    const foot = buttonRows(contentWidth, 0, buttons, theme);
+    // Account for the panel border, heading, hint, footer and optional scroll indicator.
+    pageSize = Math.max(1, maxHeight - foot.lines.length - 5);
+    const body = wrapTextWithAnsi(`${finding.title}\n\n${finding.detail}\n\nEvidence: ${finding.evidence}`, contentWidth);
     maxTop = Math.max(0, body.length - pageSize);
     top = Math.max(0, Math.min(top, maxTop));
-    const lines = [theme.fg("accent", truncateToWidth("  Heads-up details", width))];
-    lines.push(...body.slice(top, top + pageSize).map((line) => truncateToWidth(`  ${line}`, width)));
+    const content = [theme.fg("accent", "  Heads-up details")];
+    content.push(...body.slice(top, top + pageSize).map((line) => `  ${line}`));
     if (maxTop > 0) {
       const indicator = `  ${top + 1}-${Math.min(top + pageSize, body.length)}/${body.length} · ↑↓ or wheel`;
-      lines.push(theme.fg("dim", truncateToWidth(indicator, width)));
+      content.push(theme.fg("dim", indicator));
     }
-    lines.push(theme.fg("dim", truncateToWidth("  D: discuss · Esc: close", width)));
-    const footer = buttonRows(width, lines.length, buttons, theme);
-    lines.push(...footer.lines);
-    hits = footer.hits;
-    return lines;
+    content.push(theme.fg("dim", "  D: discuss · Esc: close"));
+    const footer = buttonRows(contentWidth, content.length, buttons, theme);
+    content.push(...footer.lines);
+    hits = footer.hits.map(({ y, from, to, action }) => ({
+      y: y + 1,
+      from: from + 1,
+      to: to + 1,
+      action,
+    }));
+    return panelLines(content, width, theme);
   };
   const scroll = (amount: number) => {
     const next = Math.max(0, Math.min(maxTop, top + amount));

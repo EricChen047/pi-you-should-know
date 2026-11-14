@@ -113,12 +113,12 @@ export default function headsUpExtension(pi: ExtensionAPI) {
       const result = ctx.mode === "tui"
         ? await ctx.ui.custom<"discuss" | "close">(
           (tui, theme, keys, done) => createDetailsView(finding, tui, theme, keys, done),
-          { overlay: true, overlayOptions: { width: "85%", margin: 1 }, blocked: { kind: "question", message: "Review reminder details" } },
+          { blocked: { kind: "question", message: "Review reminder details" } },
         )
         : await ctx.ui.select(`${finding.title}\n\n${finding.detail}\n\nEvidence: ${finding.evidence}`, ["Discuss with agent", "Close"]);
       if ((result === "discuss" || result === "Discuss with agent") && !stopped && generation === selectionGeneration && state.finding?.id === findingId) {
         const existing = ctx.ui.getEditorText();
-        const text = `Please discuss this reminder in the language I have been using:\n${finding.title}\n${finding.detail}\nEvidence: ${finding.evidence}`;
+        const text = `Reminder from the side agent — please review:\n${finding.title}\n${finding.detail}\nEvidence: ${finding.evidence}`;
         ctx.ui.setEditorText(existing ? `${existing}\n\n${text}` : text);
         rememberCurrentFinding();
         persist();
@@ -145,7 +145,10 @@ export default function headsUpExtension(pi: ExtensionAPI) {
       return;
     }
     const selectionGeneration = generation;
-    const selection = await ctx.ui.select(`Heads up: ${finding.title}`, ["Got it", "View details", "Dismiss", "Cancel"]);
+    const selection = await ctx.ui.select(
+      `Heads up: ${finding.title}\n\nUse ↑/↓ to choose, Enter to confirm, or Esc to cancel.`,
+      ["Got it", "View details", "Dismiss", "Cancel"],
+    );
     const action = selection === "Got it" ? "got-it" : selection === "View details" ? "details" : selection === "Dismiss" ? "dismiss" : undefined;
     if (action && !stopped && generation === selectionGeneration) await performAction(ctx, finding.id, action);
   }
