@@ -22,7 +22,7 @@ For local development, use `pi -e ./index.ts` or install the repository director
 
 - `/ysk on`: enable observation in the current session branch.
 - When a reminder appears in **fullscreen** TUI mode, click **Got it**, **View details**, or **Dismiss**. Opening the details does not dismiss the reminder. The details view can also put the finding in the editor for discussion; it never submits it automatically.
-- Press **Ctrl+Alt+Y** to open the same actions without using the mouse; navigate with the arrow keys and Enter. In the details view, use the arrow keys or mouse wheel to scroll, `D` to discuss, and Esc to close. Existing editor text is preserved in the interactive TUI.
+- Press **Ctrl+Alt+Y** (or **Ctrl+Shift+Y** if the terminal does not pass the Option key reliably) to open the same actions without using the mouse; navigate with the arrow keys and Enter. In the details view, use the arrow keys or mouse wheel to scroll, `D` to discuss, and Esc to close. Existing editor text is preserved in the interactive TUI.
 - In regular TUI mode, the terminal owns mouse input, so use **Ctrl+Alt+Y** or `/ysk` instead of clicking. The shortcut requires terminal support and may be intercepted by the OS or terminal; `/ysk` is the fallback. RPC clients also use `/ysk` because Pi's RPC UI does not support custom widgets or the shortcut.
 - `/ysk status`: show the observer model, thinking level, state, check count, and separate usage.
 - `/ysk model`: choose an authenticated observer model; use `/ysk model provider/model-id` to specify one directly, or `/ysk model current` to follow the main model. Model IDs can contain `/`.
